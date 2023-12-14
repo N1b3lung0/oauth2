@@ -4,8 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -14,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithMockUser
 class ExerciseControllerTest {
 
     @Autowired
@@ -28,8 +32,10 @@ class ExerciseControllerTest {
     }
 
     @Test
+    @DirtiesContext
     void shouldCreateANewExercise() throws Exception {
-        this.mvc.perform(post("/exercises")
+        String location = this.mvc.perform(post("/exercises")
+                        .with(csrf())
                         .contentType("application/json")
                         .content("""
                                 {
@@ -41,6 +47,13 @@ class ExerciseControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andReturn().getResponse().getHeader("Location");
+
+        assert location != null;
+
+        this.mvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Exercise1"))
+                .andExpect(jsonPath("$.owner").value("Carlos"));
     }
 
 }
