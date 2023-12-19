@@ -23,9 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -74,6 +76,20 @@ public class Oauth2SpringSecurityTests {
                 )
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().string("WWW-Authenticate", containsString("Jwt expired")));
+    }
+
+    @Test
+    void shouldShowAllTokenValidationErrors() throws Exception {
+        String expired = mint((claims) -> claims
+                .audience(List.of("https://wrong"))
+                .issuedAt(Instant.now().minusSeconds(3600))
+                .expiresAt(Instant.now().minusSeconds(3599))
+        );
+        this.mvc.perform(get("/exercises").header("Authorization", "Bearer " + expired))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().exists("WWW-Authenticate"))
+                .andExpect(jsonPath("$.errors..description").value(
+                        containsInAnyOrder(containsString("Jwt expired"), containsString("aud claim is not valid"))));
     }
 
     private String mint(Consumer<JwtClaimsSet.Builder> consumer) {
