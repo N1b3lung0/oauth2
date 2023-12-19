@@ -8,6 +8,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -17,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(username = "Carlos")
 class ExerciseControllerTest {
 
     @Autowired
@@ -39,8 +41,7 @@ class ExerciseControllerTest {
                         .contentType("application/json")
                         .content("""
                                 {
-                                    "name": "Exercise1",
-                                    "owner": "Carlos"
+                                    "name": "Exercise1"
                                 }
                                 """)
                 )
@@ -56,4 +57,11 @@ class ExerciseControllerTest {
                 .andExpect(jsonPath("$.owner").value("Carlos"));
     }
 
+    @Test
+    void shouldReturnAllExercisesWhenListIsRequested() throws Exception {
+        this.mvc.perform(get("/exercises"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$..owner").value(everyItem(equalTo("Carlos"))));
+    }
 }

@@ -1,6 +1,7 @@
 package es.n1b3lung0.oauth2.exercise;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Iterator;
+import java.util.List;
 
 @RestController
 @RequestMapping("/exercises")
@@ -29,12 +32,19 @@ public class ExerciseController {
     }
 
     @PostMapping
-    public ResponseEntity<Exercise> createExercise(@RequestBody Exercise newExercise, UriComponentsBuilder uriComponentsBuilder) {
-        Exercise savedExercise = this.exerciseRepository.save(newExercise);
+    public ResponseEntity<Exercise> createExercise(@RequestBody ExerciseRequest exerciseRequest, UriComponentsBuilder uriComponentsBuilder, @CurrentOwner String owner) {
+        Exercise exercise = new Exercise(exerciseRequest.name(), owner);
+        Exercise savedExercise = this.exerciseRepository.save(exercise);
         URI locationOfNewExercise = uriComponentsBuilder
                 .path("exercises/{id}")
                 .buildAndExpand(savedExercise.id())
                 .toUri();
         return ResponseEntity.created(locationOfNewExercise).body(savedExercise);
+    }
+
+    @GetMapping
+    public ResponseEntity<Iterable<Exercise>> findAll(@CurrentOwner String owner) {
+        var result = this.exerciseRepository.findByOwner(owner);
+        return ResponseEntity.ok(result);
     }
 }
