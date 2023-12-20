@@ -1,6 +1,7 @@
 package es.n1b3lung0.oauth2.exercise;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ public class ExerciseController {
         this.exerciseRepository = exerciseRepository;
     }
 
+    @PostAuthorize("returnObject.body.owner == authentication.name")
     @GetMapping("/{requestedId}")
     public ResponseEntity<Exercise> findById(@PathVariable Long requestedId) {
         return exerciseRepository.findById(requestedId)

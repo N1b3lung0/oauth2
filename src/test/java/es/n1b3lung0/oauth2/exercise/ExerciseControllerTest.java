@@ -65,4 +65,11 @@ class ExerciseControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$..owner").value(everyItem(equalTo("Carlos"))));
     }
+
+    @WithMockUser(username = "Andrés", authorities = {"SCOPE_exercise:read"})
+    @Test
+    void shouldReturnForbiddenWhenCardBelongsToSomeoneElse() throws Exception {
+        this.mvc.perform(get("/exercises/99"))
+                .andExpect(status().isForbidden());
+    }
 }

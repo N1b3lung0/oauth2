@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 
 @Component
+@EnableMethodSecurity
 public class ProblemDetailsAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private final AuthenticationEntryPoint delegate = new BearerTokenAuthenticationEntryPoint();
