@@ -45,8 +45,7 @@ public class ExerciseController {
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Exercise>> findAll(@CurrentOwner String owner) {
-        var result = this.exerciseRepository.findByOwner(owner);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Iterable<Exercise>> findAll() {
+        return ResponseEntity.ok(this.exerciseRepository.findAll());
     }
 }
