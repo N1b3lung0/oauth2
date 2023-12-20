@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser(username = "Carlos")
+@WithMockUser(username = "Carlos", authorities = {"SCOPE_exercise:read"})
 class ExerciseControllerTest {
 
     @Autowired
@@ -33,6 +33,7 @@ class ExerciseControllerTest {
                 .andExpect(jsonPath("$.owner").value("Carlos"));
     }
 
+    @WithMockUser(username = "Andrés", authorities = {"SCOPE_exercise:read", "SCOPE_exercise:write"})
     @Test
     @DirtiesContext
     void shouldCreateANewExercise() throws Exception {
@@ -54,7 +55,7 @@ class ExerciseControllerTest {
         this.mvc.perform(get(location))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Exercise1"))
-                .andExpect(jsonPath("$.owner").value("Carlos"));
+                .andExpect(jsonPath("$.owner").value("Andrés"));
     }
 
     @Test

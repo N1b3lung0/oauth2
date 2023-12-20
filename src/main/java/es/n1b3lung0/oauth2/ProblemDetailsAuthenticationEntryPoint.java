@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -52,7 +53,12 @@ public class ProblemDetailsAuthenticationEntryPoint implements AuthenticationEnt
             ProblemDetailsAuthenticationEntryPoint entryPoint
     ) throws Exception {
         http
-                .authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+                .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers(HttpMethod.GET,"/exercises/**")
+                        .hasAuthority("SCOPE_exercise:read")
+                        .requestMatchers("/exercises/**")
+                        .hasAuthority("SCOPE_exercise:write")
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .authenticationEntryPoint(entryPoint)
                         .jwt(Customizer.withDefaults())
