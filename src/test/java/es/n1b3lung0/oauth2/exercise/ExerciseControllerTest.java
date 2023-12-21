@@ -33,6 +33,12 @@ class ExerciseControllerTest {
                 .andExpect(jsonPath("$.owner").value("Carlos"));
     }
 
+    @Test
+    void shouldNotReturnAnExerciseWithAnUnknownId() throws Exception {
+        this.mvc.perform(get("/exercises/33"))
+                .andExpect(status().isNotFound()); // TODO: test response body is blank
+    }
+
     @WithMockUser(username = "Andrés", authorities = {"SCOPE_exercise:read", "SCOPE_exercise:write"})
     @Test
     @DirtiesContext
@@ -71,5 +77,28 @@ class ExerciseControllerTest {
     void shouldReturnForbiddenWhenCardBelongsToSomeoneElse() throws Exception {
         this.mvc.perform(get("/exercises/99"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldReturnAPageOfExercises() throws Exception {
+        this.mvc.perform(get("/exercises?page=0&size=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void shouldReturnASortedPageOfExercises() throws Exception {
+        this.mvc.perform(get("/exercises?page=0&size=1&sort=name,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$..owner").value(everyItem(equalTo("Carlos"))));
+    }
+
+    @Test
+    void shouldReturnASortedPageOfExercisesWithNoParametersAndUseDefaultValues() throws Exception {
+        this.mvc.perform(get("/exercises"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$..owner").value(everyItem(equalTo("Carlos"))));
     }
 }

@@ -6,5 +6,5 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          public-key-location: classpath:authz.pub
+          public-key-location: classpath:authz.pub # TODO: change to issuer-uri
           audiences: exercise-client
